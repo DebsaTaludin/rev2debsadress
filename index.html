@@ -7,7 +7,65 @@
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
 </head>
 <body>
+    <main>
     <h1 class="text-3xl">Address Book</h1>
-    <script src="script.js"></script>
+
+    <div class="grid grid-cols-2">
+        <form class="ms-5 mt-5 space-y-2" id="formContact">
+            <div class="grid grid-cols-2 w-fit">
+                <label for="fullName">FullName</label>
+                <input
+                class="border"
+                type="text"
+                name="fullName"
+                id="fullName"
+            required
+        />
+        </div>
+
+        <div class="grid grid-cols-2 w-fit">
+            <label for="phone">Phone Number</label>
+            <input
+            class="border"
+            type="number"
+            name="phone"
+            id="phone"
+            required
+            />
+        </div>
+
+        <div class="grid grid-cols-2 w-fit">
+            <label for="email">Email</label>
+            <input
+            class="border"
+            type="email"
+            name="email"
+            id="email"
+            required
+            />
+        </div>
+
+        <div class="grid grid-cols-2 w-fit">
+            <label for="location">Location</label>
+            <input
+            class="border"
+            type="text"
+            name="location"
+            id="location"
+            required
+            />
+        </div>
+
+        <button class="border bg-black text-white rounded-md px-3 py-1">
+            Submit
+        </button>
+        </form>
+        <ul id="contact-list">
+            <!-- Contact will be dynamically inserted here -->
+        </ul>
+    </div>
+    </main>
+
+    <script src="script/script.js"></script>
 </body>
 </html>
