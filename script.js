@@ -1,4 +1,4 @@
-const dataContacts = [
+let dataContacts = [
     {
         id: 1,
         fullName: "Debsa Taludin",
@@ -22,46 +22,80 @@ const dataContacts = [
     },
 ];
 
+// --- DOM ---
+const contactList = document.getElementById("contact-list");
+
+const contactFormElement = document.getElementById("formContact");
+
+contactFormElement.addEventListener("submit", addContact);
+
+window.deleteContact = deleteContact;
+
+const fullNameInputElement = document.getElementById("fullName");
+const phoneInputElement = document.getElementById("phone");
+const emailInputElement = document.getElementById("email");
+const locationInputElement = document.getElementById("location");
+
+// --- FUNCTION ---
+
 function displayContacts() {
-    for (const contact of dataContacts) {
-        console.log(`
-            🆔 : ${contact.id}
-            🧑🏻 : ${contact.fullName}
-            📱 : ${contact.phone}
-            📍 : ${contact.location}
-            ✉️ : ${contact.email}
-            `);
-    }
+    loadContacts = loadFormLocalStorage();
+    loadContacts === null ? saveToLocalStorage() : null;
+
+    const contactListElement = loadContacts.map((contact) => {
+        return `
+        <li class="border w-lg my-2 rounded-md">
+        <h1>${contact.fullName}</h1>
+        <p>${contact.phone}</p>
+        <p>${contact.email}</p>
+        <p>${contact.location}</p>
+
+        <button
+        onclick="deleteContact(${contact.id})"
+        class="border text-white bg-red-400 rounded-lg px-2 py-1"
+        >
+        Delete
+        </button>
+        <a
+        href="/?id=${contact.id}"
+        class="border text-white bg-black rounded-lg px-2 py-1"
+        >
+        Edit
+        </a>
+        </li>
+        `;
+    });
+
+    contactList.innerHTML = contactListElement.join("");
 }
 
-function getLastId() {
-    function getId(dataContacts) {
-        // STEP 1: Cek apakah dataContacts kosong?
-        if (dataContacts.length === 0) {
-            return 1; // Jika kosong, kembalikan ID 1 sebagai ID pertama
-        }
-
-        // STEP 2: Cari index (urutan) barang paling terakhir
-        const indexTerakhir = dataContacts.length - 1;
-
-        // STEP 3: Ambil objeck kontak yang paling terakhir
-        const kontakTerakhir = dataContacts[indexTerakhir];
-
-        // STEP 4: Ambil ID-nya, lalu tambah 1
-        const idBaru = kontakTerakhir.id + 1;
-
-        return idBaru;
-    }
+function createNewId() {
+    // to create new id, we need to know last id in dataContacts.
+    // so we access the array of object using Square Brackets to access array [] and dot notaion to accsess object (.)
+    // access the last element with dataContacts[dataContacts.length -1] and get its id property.
+    // after we know the last id, Add 1 to the last id to generate a new unique id.
+    const newId = dataContacts[dataContacts.length -1].id + 1;
+    return newId;
 }
+function addContact(event) {
+    event.preventDefault();
 
-function addContact(fullName, phone, email, location) {
-    dataContacts.push({
-        id: getLastId(),
-        fullName: fullName,
-        phone: phone,
-        email: email,
-        location: location,
-        });
+    const contacts = loadFormLocalStorage();
+
+    const contactFormData = new FormData(contactFormElement);
+
+    const newContact = {
+        id: createNewId(),
+        fullName: contactFormData.get("fullName"),
+        phone: contactFormData.get("phone"),
+        email: contactFormData.get("email"),
+        location: contactFormData.get("location"),
+    };
+
+    const updateContacts = [...contacts, newContact];
+
+    saveToLocalStorage(updateContacts);
+    displayContacts();
 }
 
 function searchContacts(keyword) {
@@ -78,17 +112,74 @@ function searchContacts(keyword) {
             ✉️ : ${contact.email}
             `);
     }
-    // console.log(filteredContacts);
 }
 
-function deleteContact() {
-    // T0D0
+function deleteContact(id) {
+    const contacts = loadFormLocalStorage();
+    const updateContacts = contacts.filter((contact) => contact.id !== id);
+
+    saveToLocalStorage(updateContacts);
+    displayContacts();
 }
 
-function updateContact() {
-    // T0D0
+function getId() {
+    const queryString = window.location.search;
+    const params = new URLSearchParams(queryString);
+    const id = params.get("id");
+
+    return id;
 }
 
-addContact("Rano Agustino", 6281234567890, "rano@example.com", "Jakarta");
-addContact("Rano Agustini", 6281234567890, "rano@example.com", "Jakarta");
-// displayContacts();
+const contacts = loadFormLocalStorage();
+const id = getId();
+
+contacts.find((contact) => {
+    if (id == contact.id) {
+        fullNameInputElement.value = contact.fullName;
+        phoneInputElement.value = contact.phone;
+        emailInputElement.value = contact.email;
+        locationInputElement.value = contact.location;
+    }
+});
+
+// T0D0: MOVE THIS INTO PAGE EDIT
+function updateContact(event) {
+    event.preventDefault();
+
+    const contactFormData = new FormData(contactFormElement);
+
+    const newContact = {
+        id: Number(id),
+        fullName: contactFormData.get("fullName"),
+        phone: contactFormData.get("phone"),
+        email: contactFormData.get("email"),
+        location: contactFormData.get("location"),
+    };
+
+    const updateContacts = contacts.map((contact) => {
+        if (contact.id == id) {
+            return {
+                ...contact,
+                ...newContact,
+            };
+        } else {
+            return contact;
+        }
+    });
+
+    saveToLocalStorage(updateContacts);
+    window.location.href = "/";
+    displayContacts();
+}
+
+function saveToLocalStorage(contact) {
+    localStorage.setItem("contacts", JSON.stringify(contact));
+}
+
+function loadFormLocalStorage() {
+    const contactsFormSrorage = localStorage.getItem("contacts");
+    return JSON.parse(contactsFormSrorage);
+}
+
+// RUN PROGRAM
+displayContacts();
